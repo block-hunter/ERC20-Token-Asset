@@ -1,12 +1,14 @@
 import React, { Component } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import MyToken from "./contracts/MyToken.json";
+import MyTokenSales from "./contracts/MyTokenSale.json";
+import KycContract from "./contracts/KycContract.json";
 import getWeb3 from "./getWeb3";
-
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
 
+  state = {loaded: false};
+  
   componentDidMount = async () => {
     try {
       // Get network provider and web3 instance.
@@ -16,14 +18,23 @@ class App extends Component {
       const accounts = await web3.eth.getAccounts();
 
       // Get the contract instance.
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
-      const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
-        deployedNetwork && deployedNetwork.address,
+      this.networkId = await web3.eth.getChainId();
+
+      this.myToken = new this.web3.eth.Contract(
+        MyToken.abi,
+        MyToken.networks[this.networkId] && MyToken.networks[this.networkId].address
       );
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
+      this.myTokenSales = new this.web3.eth.Contract(
+        MyTokenSales.abi,
+        MyTokenSales.networks[this.networkId] && MyTokenSales.networks[this.networkId].address
+      );
+
+      this.kycContract = new this.web3.Contract(
+        KycContract.abi,
+        KycContract.networks[this.networkId] &&  KycContract.networks[this.networkId].address
+      )
+
       // example of interacting with the contract's methods.
       this.setState({ web3, accounts, contract: instance }, this.runExample);
     } catch (error) {
